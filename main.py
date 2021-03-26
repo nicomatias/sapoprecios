@@ -48,7 +48,7 @@ def main(event={}, context={}):
             'parse_mode': 'Markdown'
         }
 
-        r = requests.post(TELEGRAM_API_SEND_MSG, data=data)
+        rs = requests.post(TELEGRAM_API_SEND_MSG, data=data)
 
 if __name__ == '__main__':
     main()
