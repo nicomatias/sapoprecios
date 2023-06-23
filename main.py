@@ -27,9 +27,9 @@ def verificar_precio_bajo(url, precio_limite, chat_id, bot_token):
         bot.send_message(chat_id=chat_id, text=mensaje)
 
 # Ejemplo de uso
-url = 'https://www.ejemplo.com/producto'
-precio_limite = 50.0
-chat_id = 'TU_CHAT_ID'  # Reemplaza con el chat_id válido
-bot_token = 'TU_BOT_TOKEN'  # Reemplaza con el token de tu bot
+url = 'https://tienda.clarochile.cl/catalogo/consola-nintendo-switch-lite-blue-7004526acc'
+precio_limite = "$199.990"
+chat_id = '890592691'  # Reemplaza con el chat_id válido
+bot_token = '1670672744:AAHVU3HLN_UZLF0-3Vd3K9WSKaH5Vhxp3FM'  # Reemplaza con el token de tu bot
 
 verificar_precio_bajo(url, precio_limite, chat_id, bot_token)
