@@ -1,54 +1,35 @@
-# Note: load_dotenv() will automatically parse the .env file we created earlier 
-# and the key/value pair will be loaded into system environment variable which 
-# can be accessed via os.getenv() later.
-
-from dotenv import load_dotenv
-load_dotenv()
-
-import os
 import requests
 from bs4 import BeautifulSoup
+import telegram
 
-# Now we will declare several constant variables and use a list to include the items we are interested in getting the update.
+def verificar_precio_bajo(url, precio_limite, chat_id, bot_token):
+    # Obtener el contenido HTML de la página
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-# We use os.gentenv() to retrieve the environment variable we set earlier and use the token to form our Telegram /sendMessage API URL, 
-# note that we are using f-Strings for TELEGRAM_API_SEND_MSG, it was introduced in Python 3.6 and aim to make string formatting easier and cleaner.
-# On the other hand, we can have several entries in items.
+    # Encontrar el elemento que contiene el precio
+    # Esto depende de la estructura HTML de la página específica
+    precio_elemento = soup.find('span', {'class': 'precio'})
 
-BASE_URL = 'https://www.kogan.com/nz/'
-TOKEN = os.getenv('TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
-TELEGRAM_API_SEND_MSG = f'https://api.telegram/bot{TOKEN}/sendMessage'
+    # Obtener el valor del precio como una cadena
+    precio_str = precio_elemento.text.strip()
 
-items = [
-    'buy/kogan-35-curved-219-ultrawide-75hz-freesync-gaming-monitor-b/',
-    'buy/kogan-full-rgb-mechanical-keyboard-brown-switch/'
-]
+    # Convertir el valor del precio a un número
+    precio = float(precio_str)
 
-# Finally, we use a loop to go through the items and scrape their name and price using BeautifulSoup’s HTML parser, 
-# then send the data to Telegram API using our TOKEN and CHAT_ID.
+    # Verificar si el precio es menor que el límite establecido
+    if precio < precio_limite:
+        # Inicializar el bot de Telegram
+        bot = telegram.Bot(token=bot_token)
 
-def main(event={}, context={}):
-    for item in items:
-        url = BASE_URL + item
-        r = requests.get(url)
+        # Enviar el mensaje de alerta al chat_id especificado
+        mensaje = f"¡Alerta! El precio en {url} es más bajo de lo esperado."
+        bot.send_message(chat_id=chat_id, text=mensaje)
 
-        # Note: With BeautifulSoup, we can use CSS selectors to traverse through HTML and find our element of interest then extract data out of it.
-        
-        soup = BeautifulSoup(r.text, 'html.parser')
-        name = soup.select_one('h1[itemprop="name"]').get_text()
-        price = soup.select_one('h3[itemprop="price"]')['content']
+# Ejemplo de uso
+url = 'https://www.ejemplo.com/producto'
+precio_limite = 50.0
+chat_id = 'TU_CHAT_ID'  # Reemplaza con el chat_id válido
+bot_token = 'TU_BOT_TOKEN'  # Reemplaza con el token de tu bot
 
-        # The data dictionary contains the parameters to be sent to Telegram /sendMessage API using POST request. 
-        # chat_id and text are required parameters while parse_mode is an optional one, we use Markdown parse mode to show bold and inline URL in our message.
-
-        data = {
-            'chat_id': CHAT_ID,
-            'text': f'*${price}*\n[{name}]({url})',
-            'parse_mode': 'Markdown'
-        }
-
-        rs = requests.post(TELEGRAM_API_SEND_MSG, data=data)
-
-if __name__ == '__main__':
-    main()
+verificar_precio_bajo(url, precio_limite, chat_id, bot_token)
